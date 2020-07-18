@@ -12,7 +12,7 @@ import cookieParser from 'cookie-parser'
 import config from './config'
 import Html from '../client/html'
 
-const { writeFile, readFile, unlink } = require("fs").promises
+const { writeFile, readFile, unlink } = require('fs').promises
 
 const Root = () => ''
 
@@ -33,9 +33,9 @@ try {
 let connections = []
 
 const headers = (req, res, next) => {
-  res.set('x-skillcrucial-user', 'be4b8e46-04db-4947-9dde-e69216b5f16c');  
+  res.set('x-skillcrucial-user', 'be4b8e46-04db-4947-9dde-e69216b5f16c')
   res.set('Access-Control-Expose-Headers', 'X-SKILLCRUCIAL-USER')
-  next()  
+  next()
 }
 
 const port = process.env.PORT || 8090
@@ -51,17 +51,19 @@ const middleware = [
 ]
 
 const readWrite = () => {
-  return readFile(`${__dirname}/test.json`, { encoding: "utf8" })
-    .then( txt => JSON.parse(txt))
-    .catch ( async () => {
-      const users = await axios(`https://jsonplaceholder.typicode.com/users`). then( usr => usr.data)
-      writeFile(`${__dirname}/test.json`, JSON.stringify(users), { encoding: "utf8" })
+  return readFile(`${__dirname}/test.json`, { encoding: 'utf8' })
+    .then((txt) => JSON.parse(txt))
+    .catch(async () => {
+      const users = await axios(`https://jsonplaceholder.typicode.com/users`).then(
+        (usr) => usr.data
+      )
+      writeFile(`${__dirname}/test.json`, JSON.stringify(users), { encoding: 'utf8' })
       return users
     })
 }
 
 const write = (newUsers) => {
-  return writeFile(`${__dirname}/test.json`, JSON.stringify(newUsers), { encoding: "utf8" })
+  return writeFile(`${__dirname}/test.json`, JSON.stringify(newUsers), { encoding: 'utf8' })
 }
 
 middleware.forEach((it) => server.use(it))
@@ -76,20 +78,20 @@ server.post('/api/v1/users', async (req, res) => {
   const users = await readWrite()
   // const lastUserId = users[users.length - 1].id + 1
   const usersSort = users.sort(users.id)
-  const lastUserId = usersSort[usersSort.length - 1]. id+1
-  const newUsers = [ ... users, {...newUser, id: lastUserId}]
+  const lastUserId = usersSort[usersSort.length - 1].id + 1
+  const newUsers = [...users, { ...newUser, id: lastUserId }]
   write(newUsers)
-  res.json({status: 'success', id: lastUserId})
+  res.json({ status: 'success', id: lastUserId })
 })
 
 server.patch('/api/v1/users/:userId', async (req, res) => {
   const { userId } = req.params
   const users = await readWrite()
-  const addInfoUser = users.find(item => item.id === +userId)
+  const addInfoUser = users.find((item) => item.id === +userId)
   const newFields = { ...addInfoUser, ...req.body }
-  const list = users.reduce((acc,rec) => {
+  const list = users.reduce((acc, rec) => {
     return rec.id === +userId ? [...acc, newFields] : [...acc, rec]
-  },[])
+  }, [])
   write(list)
   res.json({ status: 'success', id: userId })
 })
@@ -97,22 +99,20 @@ server.patch('/api/v1/users/:userId', async (req, res) => {
 server.delete('/api/v1/users/:userId', async (req, res) => {
   const { userId } = req.params
   const users = await readWrite()
-  const filterUsers = users.filter(it => it.id !== +userId)
+  const filterUsers = users.filter((it) => it.id !== +userId)
   write(filterUsers)
   res.json({ status: 'success', id: userId })
 })
 
-server.delete('/api/v1/users/', async (req,res) => {
+server.delete('/api/v1/users/', async (req, res) => {
   unlink(`${__dirname}/test.json`)
-  res.json( { status: 'delete' })
+  res.json({ status: 'delete' })
 })
 
 server.use('/api/', (req, res) => {
   res.status(404)
   res.end()
 })
-
-
 
 const [htmlStart, htmlEnd] = Html({
   body: 'separator',
