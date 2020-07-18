@@ -8,7 +8,6 @@ import React from 'react'
 
 import axios from 'axios'
 
-
 import cookieParser from 'cookie-parser'
 import config from './config'
 import Html from '../client/html'
